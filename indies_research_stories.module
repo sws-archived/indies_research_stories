@@ -1,0 +1,62 @@
+<?php
+/**
+ * @file
+ * Code for the INDIES - Research Stories feature.
+ */
+
+include_once 'indies_research_stories.features.inc';
+
+/**
+ * Implementation of hook_block_view_alter().
+ */
+function indies_research_stories_block_view_alter(&$data, $block) {
+  if ($data['content']['bean'][$block->delta]['#view_mode'] == 'pop_up_video') {
+    $block->cache = 0;
+  }
+}
+
+/**
+ * Implementation of hook_entity_view_mode_alter().
+ */
+function indies_research_stories_entity_view_mode_alter(&$view_mode, $context) {
+
+  // Add colorbox library and javascript to view mode.
+  if ($view_mode == "pop_up_video") {
+    libraries_load("colorbox");
+    drupal_add_js(drupal_get_path("module", "indies_research_stories") . "/js/indies-research-stories.js");
+    drupal_add_css(drupal_get_path("module", "indies_research_stories") . "/css/indies-research-stories.css");
+  }
+
+}
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Retrieves the view mode information for the Bean type and makes available
+ * as an option only those view modes which apply to this Bean by having
+ * custom settings. This ensures the view mode form element is not populated
+ * with irrelevant view modes that do not necessarily apply to this bean.
+ */
+function indies_research_stories_form_bean_form_alter(&$form, &$form_state) {
+  $options = array();
+  $bean_info = $form['#entity']->entityInfo();
+  $view_mode_settings = field_view_mode_settings('bean', $form['#entity']->type);
+  foreach ($view_mode_settings as $view_mode => $settings) {
+    if ($settings['custom_settings'] && isset($bean_info['view modes'][$view_mode])) {
+      $options[$view_mode] = $bean_info['view modes'][$view_mode]['label'];
+    }
+  }
+
+  // Always should have one.
+  if (empty($options) || !isset($options['default'])) {
+    $options['default'] = t("Default");
+  }
+
+  // Set the default option for research featured stories.
+  if ($form['#entity']->type == "stanford_research_story" && $form['view_mode']['#default_value'] == "default") {
+    $form['view_mode']["#default_value"] = "research_featured_stories";
+  }
+
+  $form['view_mode']['#options'] = $options;
+}

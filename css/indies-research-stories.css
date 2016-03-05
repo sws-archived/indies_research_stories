@@ -1,0 +1,20 @@
+/* line 2, indies-research-stories.scss */
+#colorbox .video-embed-container {
+  display: block;
+}
+
+/* line 7, indies-research-stories.scss */
+.video-embed-container {
+  display: none;
+  height: 100%;
+}
+
+.video-embed-container p {
+  height: 100%;
+}
+
+.flexvideo {
+  width: 100%;
+  height: 100%;
+}
+
